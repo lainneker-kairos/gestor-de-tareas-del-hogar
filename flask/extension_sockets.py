@@ -1,1 +1,10 @@
-from extension_sockets import socketio, broadcast_event
+# Ruta: ./flask/extension_sockets.py
+from flask_socketio import SocketIO
+
+socketio = SocketIO(cors_allowed_origins="*")
+
+def broadcast_event(event_name, data):
+    """
+    Utility function to broadcast real-time updates to all connected clients.
+    """
+    socketio.emit(event_name, data)

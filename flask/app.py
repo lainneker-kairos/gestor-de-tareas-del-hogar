@@ -3,7 +3,7 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from database import db
-from extention_sockets import socketio
+from extension_sockets import socketio
 
 # Import Models
 from models.user import User

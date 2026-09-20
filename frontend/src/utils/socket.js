@@ -1,13 +1,16 @@
 import { io } from 'socket.io-client';
 
 const SOCKET_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
   process.env.NEXT_PUBLIC_BACKEND_URL ||
+  process.env.NEXT_PUBLIC_API_URL ||
   'https://gestor-de-tareas-del-hogar.onrender.com';
 
 export const socket = io(SOCKET_URL, {
-  autoConnect: false,
-  transports: ['websocket', 'polling'],
+  autoConnect: true,
+  transports: ['polling', 'websocket'],
+  reconnection: true,
+  reconnectionAttempts: 10,
+  reconnectionDelay: 2000,
 });
 
 export const initSocket = () => {

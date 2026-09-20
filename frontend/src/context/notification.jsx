@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { socket } from '../utils/socket';
+import { socket, initSocket } from '../utils/socket';
 
 const NotificationContext = createContext();
 
@@ -12,7 +12,7 @@ export function NotificationProvider({ children }) {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    // Load persisted auth from localStorage
+    // Cargar sesión persistida
     if (typeof window !== 'undefined') {
       const storedToken = localStorage.getItem('token');
       const storedUser = localStorage.getItem('user');
@@ -26,7 +26,10 @@ export function NotificationProvider({ children }) {
       }
     }
 
-    // Socket status handlers
+    // Conectar socket y registrar listeners
+    initSocket();
+    setIsConnected(socket.connected);
+
     function onConnect() {
       setIsConnected(true);
     }
@@ -87,18 +90,17 @@ export function NotificationProvider({ children }) {
       }}
     >
       {children}
-      
+
       {/* Toast Notification Container */}
       {toast && (
         <div className="fixed bottom-6 right-6 z-50 transition-all duration-300 transform translate-y-0">
           <div
-            className={`px-5 py-3.5 rounded-xl shadow-2xl backdrop-blur-md border flex items-center gap-3 text-sm font-medium ${
-              toast.type === 'error'
+            className={`px-5 py-3.5 rounded-xl shadow-2xl backdrop-blur-md border flex items-center gap-3 text-sm font-medium ${toast.type === 'error'
                 ? 'bg-rose-950/90 border-rose-500/50 text-rose-200 shadow-rose-950/50'
                 : toast.type === 'success'
-                ? 'bg-[var(--c5)]/20/90 border-white/20/50 text-emerald-200 shadow-emerald-950/50'
-                : 'bg-transparent/90 border-white/20/50 text-white shadow-indigo-950/50'
-            }`}
+                  ? 'bg-[var(--c5)]/20/90 border-white/20/50 text-emerald-200 shadow-emerald-950/50'
+                  : 'bg-transparent/90 border-white/20/50 text-white shadow-indigo-950/50'
+              }`}
           >
             <span>{toast.message}</span>
             <button

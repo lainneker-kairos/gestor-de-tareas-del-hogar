@@ -1,5 +1,4 @@
 import os
-import re
 from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
@@ -21,7 +20,7 @@ from routes.settings_routes import settings_bp
 def create_app():
     app = Flask(__name__)
 
-    # Configuración de llaves secretas
+    # Configuración de claves secretas
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'distribucion-tareas-super-secret-key-2026')
     app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY', 'jwt-secret-key-distribucion-tareas')
     
@@ -36,23 +35,15 @@ def create_app():
     db.init_app(app)
     JWTManager(app)
 
-    # CORS para admitir dominios de producción y previews de Vercel
-    allowed_origins = [
-        r"^https://.*\.vercel\.app$",
-        r"^http://localhost:3000$"
-    ]
-    frontend_custom_url = os.environ.get('FRONTEND_URL')
-    if frontend_custom_url:
-        allowed_origins.append(frontend_custom_url)
-
+    # CORS global para /api/* que responde correctamente a preflights OPTIONS
     CORS(
         app,
-        resources={r"/api/*": {"origins": allowed_origins}},
-        supports_credentials=True,
+        resources={r"/api/*": {"origins": "*"}},
         allow_headers=["Content-Type", "Authorization"],
         methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
     )
 
+    # Socket.IO con orígenes abiertos
     socketio.init_app(app, cors_allowed_origins="*")
 
     # Registro de Blueprints
@@ -69,7 +60,7 @@ def create_app():
             'version': '1.0.0'
         }), 200
 
-    # Inicializar tablas y datos iniciales
+    # Inicialización de tablas y datos iniciales
     with app.app_context():
         db.create_all()
         seed_initial_data()

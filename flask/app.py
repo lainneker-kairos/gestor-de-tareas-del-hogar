@@ -34,7 +34,7 @@ def create_app():
     # Initialize extensions
     db.init_app(app)
     JWTManager(app)
-    CORS(app, resources={r"/api/*": {"origins": "*"}})
+    CORS(app, resources={r"/api/*": {"origins": "https://gestor-de-tareas-del-hogar.vercel.app"}})
     socketio.init_app(app, cors_allowed_origins="*")
 
     # Register Blueprints

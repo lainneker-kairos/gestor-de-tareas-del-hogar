@@ -1,6 +1,10 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+// Soporta ambos nombres de variable de entorno
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  process.env.NEXT_PUBLIC_BACKEND_URL ||
+  'https://gestor-de-tareas-del-hogar.onrender.com';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -9,7 +13,7 @@ const api = axios.create({
   },
 });
 
-// Interceptor to add JWT Authorization header
+// Interceptor para agregar token JWT en las peticiones
 api.interceptors.request.use(
   (config) => {
     if (typeof window !== 'undefined') {
@@ -23,7 +27,7 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Interceptor to handle unauthorized / token expiration
+// Interceptor para manejar expiración de sesión
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -40,7 +44,6 @@ api.interceptors.response.use(
   }
 );
 
-// Service API Methods
 export const authService = {
   login: async (username, password) => {
     const res = await api.post('/api/auth/login', { username, password });
@@ -143,7 +146,7 @@ export const settingsService = {
   updateMotivationalMessage: async (message) => {
     const res = await api.post('/api/settings/motivational_message', { message });
     return res.data;
-  }
+  },
 };
 
 export default api;

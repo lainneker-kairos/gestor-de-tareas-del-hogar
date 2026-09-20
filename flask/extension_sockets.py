@@ -1,1 +1,1 @@
-from extensión_sockets import socketio, broadcast_event
+from extention_sockets import socketio, broadcast_event

@@ -1,9 +1,10 @@
 import os
+import re
 from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from database import db
-from extensión_sockets import socketio
+from extention_sockets import socketio
 
 # Import Models
 from models.user import User
@@ -20,24 +21,41 @@ from routes.settings_routes import settings_bp
 def create_app():
     app = Flask(__name__)
 
-    # Configuration
+    # Configuración de llaves secretas
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'distribucion-tareas-super-secret-key-2026')
     app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY', 'jwt-secret-key-distribucion-tareas')
     
-    # Database Configuration (PostgreSQL on Render or local SQLite fallback)
+    # Base de datos (PostgreSQL en Render o SQLite local)
     db_url = os.environ.get('DATABASE_URL', 'sqlite:///distribucion_tareas.db')
     if db_url.startswith("postgres://"):
         db_url = db_url.replace("postgres://", "postgresql://", 1)
     app.config['SQLALCHEMY_DATABASE_URI'] = db_url
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-    # Initialize extensions
+    # Inicialización de extensiones
     db.init_app(app)
     JWTManager(app)
-    CORS(app, resources={r"/api/*": {"origins": "https://gestor-de-tareas-del-hogar-mzfanq3gn-lnkr-s-projects.vercel.app"}})
-    socketio.init_app(app, cors_allowed_origins="https://gestor-de-tareas-del-hogar-mzfanq3gn-lnkr-s-projects.vercel.app")
 
-    # Register Blueprints
+    # CORS para admitir dominios de producción y previews de Vercel
+    allowed_origins = [
+        r"^https://.*\.vercel\.app$",
+        r"^http://localhost:3000$"
+    ]
+    frontend_custom_url = os.environ.get('FRONTEND_URL')
+    if frontend_custom_url:
+        allowed_origins.append(frontend_custom_url)
+
+    CORS(
+        app,
+        resources={r"/api/*": {"origins": allowed_origins}},
+        supports_credentials=True,
+        allow_headers=["Content-Type", "Authorization"],
+        methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
+    )
+
+    socketio.init_app(app, cors_allowed_origins="*")
+
+    # Registro de Blueprints
     app.register_blueprint(auth_bp)
     app.register_blueprint(task_bp)
     app.register_blueprint(schedule_bp)
@@ -51,7 +69,7 @@ def create_app():
             'version': '1.0.0'
         }), 200
 
-    # Seed Database
+    # Inicializar tablas y datos iniciales
     with app.app_context():
         db.create_all()
         seed_initial_data()
@@ -59,7 +77,6 @@ def create_app():
     return app
 
 def seed_initial_data():
-    # 1. Seed Users if table is empty
     if User.query.count() == 0:
         lainneker = User(username='Lainneker', email='lainneker@casa.com', role='administrator', is_child=False)
         lainneker.set_password('Admin.123')
@@ -72,9 +89,8 @@ def seed_initial_data():
 
         db.session.add_all([lainneker, anyeline, gabriela])
         db.session.commit()
-        print(" Seeded default users: Lainneker, Anyeline, Gabriela")
+        print("Seeded default users: Lainneker, Anyeline, Gabriela")
 
-    # 2. Seed Task Catalog if table is empty
     if TaskCatalog.query.count() == 0:
         catalog_seed = [
             {"title": "Barrer y fregar el suelo", "default_duration": 40, "is_restricted": False, "category": "Limpieza"},
@@ -105,7 +121,7 @@ def seed_initial_data():
             db.session.add(task_cat)
         
         db.session.commit()
-        print(" Seeded default task catalog with 16 tasks.")
+        print("Seeded default task catalog with 16 tasks.")
 
 app = create_app()
 

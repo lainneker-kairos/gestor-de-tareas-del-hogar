@@ -1,0 +1,122 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #FFF1C1;
+  --foreground: #033B3C;
+  --c1: #2373E7;
+  --c2: #2325E7;
+  --c3: #6F23E7;
+  --c4: #BD23E7;
+  --c5: #E723C1;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  min-height: 100vh;
+}
+
+/* 3. Progressive CSS & Glassmorphism */
+@supports (background: color-mix(in oklab, white, black)) {
+  body {
+    background:
+      radial-gradient(circle at 20% 30%, color-mix(in oklab, var(--c1) 35%, transparent) 0%, transparent 40%),
+      radial-gradient(circle at 80% 20%, color-mix(in oklab, var(--c3) 30%, transparent) 0%, transparent 40%),
+      radial-gradient(circle at 50% 80%, color-mix(in oklab, var(--c5) 40%, transparent) 0%, transparent 50%),
+      linear-gradient(180deg, #070a12 0%, #0a1120 55%, #05070d 100%);
+    background-attachment: fixed;
+    /* Adjusting text color for dark neon background */
+    color: #ffffff;
+  }
+
+  .glass-panel {
+    background: color-mix(in oklab, rgba(255, 255, 255, 0.1) 80%, transparent) !important;
+    backdrop-filter: blur(24px) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(150%) !important;
+    border: 1px solid color-mix(in oklab, rgba(255, 255, 255, 0.3) 100%, transparent) !important;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2) !important;
+  }
+
+  .glass-card {
+    background: color-mix(in oklab, rgba(255, 255, 255, 0.05) 90%, transparent) !important;
+    backdrop-filter: blur(16px) saturate(120%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(120%) !important;
+    border: 1px solid color-mix(in oklab, rgba(255, 255, 255, 0.15) 100%, transparent) !important;
+    box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.1) !important;
+  }
+}
+
+/* Glassmorphism utility classes (Fallback) */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 8px 32px 0 rgba(3, 59, 60, 0.08);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 4px 16px 0 rgba(3, 59, 60, 0.06);
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #d7d1c2;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #5aa7a3;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #1f6b75;
+}
+
+/* Animación de rayitas (Burst) para el checklist */
+@keyframes burst {
+  0% {
+    transform: scale(0.5);
+    opacity: 1;
+    border-width: 6px;
+  }
+
+  100% {
+    transform: scale(2);
+    opacity: 0;
+    border-width: 0px;
+  }
+}
+
+.animate-burst {
+  position: relative;
+}
+
+.animate-burst::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 28px;
+  height: 28px;
+  margin-top: -14px;
+  margin-left: -14px;
+  border-radius: 50%;
+  border: 4px dashed #5aa7a3;
+  /* text-coastal-aqua */
+  box-sizing: border-box;
+  animation: burst 0.5s ease-out forwards;
+  pointer-events: none;
+}
